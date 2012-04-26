@@ -1,4 +1,1 @@
-s_gtk
-=====
-
-Gtk Editor &amp; Compiler
+Work in progress ..
