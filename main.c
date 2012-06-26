@@ -188,24 +188,6 @@ void select_all ( GtkWidget *window, gpointer data )  {
 
 }
 
-void copy_text ( GtkWidget *window, gpointer data )  {
-
-    gtk_text_buffer_copy_clipboard ( buffer, clipboard );
-
-}
-
-void cut_text ( GtkWidget *window, gpointer data )  {
-
-    gtk_text_buffer_cut_clipboard ( buffer, clipboard , TRUE);
-
-}
-
-void paste_text ( GtkWidget *window, gpointer data ) {
-
-    gtk_text_buffer_paste_clipboard ( buffer, clipboard, NULL, TRUE);
-
-}
-
 int main ( int argc, char *argv[] ) {
 
     system("clear");
@@ -285,9 +267,9 @@ int main ( int argc, char *argv[] ) {
     gtk_signal_connect_object ( GTK_OBJECT ( save_item ), "activate", GTK_SIGNAL_FUNC ( save_file ), GTK_OBJECT ( window ) );
     gtk_signal_connect_object ( GTK_OBJECT ( saveas_item ), "activate", GTK_SIGNAL_FUNC ( saveas_file ), GTK_OBJECT ( window ) );
     gtk_signal_connect_object ( GTK_OBJECT ( selectall_item ), "activate", GTK_SIGNAL_FUNC ( select_all ), GTK_OBJECT ( window ) );
-    gtk_signal_connect_object ( GTK_OBJECT ( copy_item ), "activate", GTK_SIGNAL_FUNC ( copy_text ), GTK_OBJECT ( window ) );
-    gtk_signal_connect_object ( GTK_OBJECT ( cut_item ), "activate", GTK_SIGNAL_FUNC ( cut_text ), GTK_OBJECT ( window ) );
-    gtk_signal_connect_object ( GTK_OBJECT ( paste_item ), "activate", GTK_SIGNAL_FUNC ( paste_text ), GTK_OBJECT ( window ) );
+    gtk_signal_connect_object ( GTK_OBJECT ( copy_item ), "activate", GTK_SIGNAL_FUNC ( gtk_text_buffer_copy_clipboard ( buffer, clipboard ); ), GTK_OBJECT ( window ) );
+    gtk_signal_connect_object ( GTK_OBJECT ( cut_item ), "activate", GTK_SIGNAL_FUNC ( gtk_text_buffer_cut_clipboard ( buffer, clipboard , TRUE); ), GTK_OBJECT ( window ) );
+    gtk_signal_connect_object ( GTK_OBJECT ( paste_item ), "activate", GTK_SIGNAL_FUNC ( gtk_text_buffer_paste_clipboard ( buffer, clipboard, NULL, TRUE) ), GTK_OBJECT ( window ) );
     gtk_signal_connect_object ( GTK_OBJECT ( quit_item ), "activate", GTK_SIGNAL_FUNC ( destroy ), GTK_OBJECT ( window ) );
 
 
