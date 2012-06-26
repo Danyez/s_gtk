@@ -3,6 +3,7 @@
 #include <string.h>
 #include <gtk/gtk.h>
 
+GtkClipboard    *clipboard;
 GtkTextIter     start,
                 end;
 GtkTextBuffer   *buffer;
@@ -21,17 +22,18 @@ GtkWidget       *window,
                 *edit_menu,
                 *edit_item,
                 *copy_item,
+                *cut_item,
                 *paste_item,
                 *selectall_item,
                 *question_menu,
                 *question_item,
                 *about_item,
                 *char_label;
-GError 		*err = NULL;
-char            *filename;
+GError 		    *err        = NULL;
+char            *filename   = "";
 
 void check_save_act () {
-	if ( strcmp ( gtk_window_get_title ( GTK_WINDOW ( window ) ), "[s_gtk] - Danyez & System_Overide" ) == 0 ) {
+	if ( strcmp ( gtk_window_get_title ( GTK_WINDOW ( window ) ), "[s_gtk]" ) == 0 ) {
 		gtk_widget_set_sensitive ( save_item, FALSE );
 	} else {
         gtk_widget_set_sensitive ( save_item, TRUE );
@@ -40,23 +42,25 @@ void check_save_act () {
 void quit ( GtkWidget *window ) {
 
     GtkWidget *dialog;
-    g_print ( "-// request->close\n" );
+    g_print ( ". .  request->close\n" );
     dialog = gtk_message_dialog_new ( GTK_WINDOW ( window ), GTK_DIALOG_MODAL, GTK_MESSAGE_QUESTION, GTK_BUTTONS_YES_NO, "Are you sure you want to quit ?" );
 
     switch ( gtk_dialog_run ( GTK_DIALOG( dialog ) ) ) {
                 case GTK_RESPONSE_YES :
-                    g_print ( "-// close->done\n" );
+                    g_print ( ". .  close->done\n" );
                     gtk_main_quit();
                     break;
                 case GTK_RESPONSE_NO:
-                    g_print ( "-// not closed\n" );
+                    g_print ( ". .  not closed\n" );
                     gtk_widget_destroy ( dialog );
                     break;
         }
 
 }
 static void destroy( GtkWidget *widget, gpointer data ) {
+
     quit ( widget );
+
 }
 long int file_size(FILE *file) {
 
@@ -70,13 +74,13 @@ long int file_size(FILE *file) {
 void about_dialog ( GtkWidget *window, gpointer data )  {
 
     GtkWidget *dialog;
-    g_print ( "-// request->about\n" );
+    g_print ( ". .  request->about\n" );
     dialog = gtk_about_dialog_new ();
     gtk_about_dialog_set_name (GTK_ABOUT_DIALOG( dialog ), "S_GTK");
     gtk_about_dialog_set_version (GTK_ABOUT_DIALOG( dialog ), "0.1");
-    gtk_about_dialog_set_website (GTK_ABOUT_DIALOG( dialog ), "http://www.netcoders.org");
-    gtk_about_dialog_set_website_label(GTK_ABOUT_DIALOG( dialog ),"Netcoders.org");
-    gtk_about_dialog_set_comments (GTK_ABOUT_DIALOG( dialog ), "A simple GTK Editor and Compiler\n\nBy Danyez & System_Overide");
+    gtk_about_dialog_set_website (GTK_ABOUT_DIALOG( dialog ), "http://www.danyez.net");
+    gtk_about_dialog_set_website_label(GTK_ABOUT_DIALOG( dialog ),"danyez.net");
+    gtk_about_dialog_set_comments (GTK_ABOUT_DIALOG( dialog ), "A simple GTK Editor and Compiler\n\nBy Danyez");
 
     gtk_dialog_run ( GTK_DIALOG( dialog ) );
     gtk_widget_destroy ( dialog );
@@ -89,7 +93,7 @@ void if_resized ( GtkWidget *window, gpointer data )  {
 static void new_doc() {
 
     gtk_text_buffer_get_bounds (buffer, &start, &end);
-    gtk_window_set_title ( GTK_WINDOW ( window ), "[s_gtk] - Danyez & System_Overide" );
+    gtk_window_set_title ( GTK_WINDOW ( window ), "[s_gtk]" );
     check_save_act ();
     gtk_text_buffer_delete (buffer, &start, &end);
 
@@ -107,7 +111,7 @@ static void open_file() {
         fread ( text, sizeof ( text ), 1, o_file );
         if ( g_utf8_validate ( text, filesize, NULL ) ) {
             gtk_text_buffer_set_text ( buffer, text, filesize );
-            new_title = g_strconcat ( "[s_gtk] - ", filename, NULL );
+            new_title = g_strconcat ( "[s_gtk] ", filename, NULL );
             gtk_window_set_title ( GTK_WINDOW ( window ), new_title );
             check_save_act ();
         } else {
@@ -131,27 +135,30 @@ static void file_load() {
 
 }
 static void save_file() {
-    	gchar *text;
+
+    gchar *text;
 	gboolean result;
 
-    	gtk_text_buffer_get_bounds (buffer, &start, &end);
+    gtk_text_buffer_get_bounds (buffer, &start, &end);
 	text = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
 	result = g_file_set_contents (filename, text, -1, &err);
 
 	if(result == FALSE ) {
-		g_print("-// [SAVE ERROR]\n");
+		g_print(". .  [SAVE ERROR]\n");
 	}
 
 	else {
-		g_print("-// %s // [SAVED]\n",filename);
-	}}
-static void  saveas_file(){
+		g_print(". .  %s // [SAVED]\n",filename);
+	}
+
+}
+static void  saveas_file() {
 
 	gboolean result;
 	gchar *text;
 	gchar *new_title;
 
-gtk_text_buffer_get_bounds (buffer, &start, &end);
+    gtk_text_buffer_get_bounds (buffer, &start, &end);
 
 	text = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
 
@@ -163,27 +170,45 @@ gtk_text_buffer_get_bounds (buffer, &start, &end);
         filename = gtk_file_chooser_get_filename ( GTK_FILE_CHOOSER ( open_dialog ) );
         result = g_file_set_contents (filename, text, -1, &err);
         if(result == FALSE ) {
-			g_print("-// [SAVE ERROR]\n");
+			g_print(". .  [SAVE ERROR]\n");
 		} else {
 			new_title = g_strconcat ( "[s_gtk] - ", filename, NULL );
             gtk_window_set_title ( GTK_WINDOW ( window ), new_title );
-			g_print("-// %s // [SAVED]\n",filename);
+			g_print(". .  %s // [SAVED]\n",filename);
 		}
     }
     gtk_widget_destroy ( open_dialog );
+
 }
 void select_all ( GtkWidget *window, gpointer data )  {
+
     gtk_text_buffer_get_bounds ( buffer, &start, &end );
     gtk_text_buffer_place_cursor ( buffer, &start );
     gtk_text_buffer_move_mark_by_name ( buffer, "selection_bound", &end );
+
 }
+
 void copy_text ( GtkWidget *window, gpointer data )  {
+
+    gtk_text_buffer_copy_clipboard ( buffer, clipboard );
+
 }
+
+void cut_text ( GtkWidget *window, gpointer data )  {
+
+    gtk_text_buffer_cut_clipboard ( buffer, clipboard , TRUE);
+
+}
+
 void paste_text ( GtkWidget *window, gpointer data ) {
+
+    gtk_text_buffer_paste_clipboard ( buffer, clipboard, NULL, TRUE);
+
 }
 
 int main ( int argc, char *argv[] ) {
 
+    system("clear");
     gtk_init ( &argc, &argv );
 
     window          = gtk_window_new (GTK_WINDOW_TOPLEVEL);
@@ -201,6 +226,7 @@ int main ( int argc, char *argv[] ) {
     edit_menu       = gtk_menu_new();
     edit_item       = gtk_menu_item_new_with_label("Edit");
     copy_item       = gtk_menu_item_new_with_label("Copy");
+    cut_item        = gtk_menu_item_new_with_label("Cut");
     paste_item      = gtk_menu_item_new_with_label("Paste");
     selectall_item  = gtk_menu_item_new_with_label("Select All");
     textview        = gtk_text_view_new ();
@@ -208,10 +234,11 @@ int main ( int argc, char *argv[] ) {
     scrolled_window = gtk_scrolled_window_new(NULL, NULL);
     char_label      = gtk_label_new ("-------------------------------------------");
     table           = gtk_table_new (3,3,FALSE);
+    clipboard       = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
 
 
     gtk_widget_set_size_request ( window, 600, 600 );
-    gtk_window_set_title ( GTK_WINDOW ( window ), "[s_gtk] - Danyez & System_Overide" );
+    gtk_window_set_title ( GTK_WINDOW ( window ), "[s_gtk]" );
 
     gtk_menu_append ( GTK_MENU ( file_menu ), new_item );
     gtk_menu_append ( GTK_MENU ( file_menu ), open_item );
@@ -219,6 +246,7 @@ int main ( int argc, char *argv[] ) {
     gtk_menu_append ( GTK_MENU ( file_menu ), saveas_item );
     gtk_menu_append ( GTK_MENU ( file_menu ), quit_item );
     gtk_menu_append ( GTK_MENU ( edit_menu ), copy_item );
+    gtk_menu_append ( GTK_MENU ( edit_menu ), cut_item );
     gtk_menu_append ( GTK_MENU ( edit_menu ), paste_item );
     gtk_menu_append ( GTK_MENU ( edit_menu ), selectall_item );
     gtk_menu_append ( GTK_MENU ( question_menu ), about_item );
@@ -258,12 +286,13 @@ int main ( int argc, char *argv[] ) {
     gtk_signal_connect_object ( GTK_OBJECT ( saveas_item ), "activate", GTK_SIGNAL_FUNC ( saveas_file ), GTK_OBJECT ( window ) );
     gtk_signal_connect_object ( GTK_OBJECT ( selectall_item ), "activate", GTK_SIGNAL_FUNC ( select_all ), GTK_OBJECT ( window ) );
     gtk_signal_connect_object ( GTK_OBJECT ( copy_item ), "activate", GTK_SIGNAL_FUNC ( copy_text ), GTK_OBJECT ( window ) );
+    gtk_signal_connect_object ( GTK_OBJECT ( cut_item ), "activate", GTK_SIGNAL_FUNC ( cut_text ), GTK_OBJECT ( window ) );
     gtk_signal_connect_object ( GTK_OBJECT ( paste_item ), "activate", GTK_SIGNAL_FUNC ( paste_text ), GTK_OBJECT ( window ) );
     gtk_signal_connect_object ( GTK_OBJECT ( quit_item ), "activate", GTK_SIGNAL_FUNC ( destroy ), GTK_OBJECT ( window ) );
 
 
 
-    check_save_act();
+    check_save_act ( );
 
     gtk_main ( );
 
